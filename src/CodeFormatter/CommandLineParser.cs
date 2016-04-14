@@ -29,7 +29,8 @@ namespace CodeFormatter
             ImmutableArray<string>.Empty,
             null,
             allowTables: false,
-            verbose: false);
+            verbose: false,
+            useTabs: false);
 
         public static readonly CommandLineOptions ShowHelp = new CommandLineOptions(
             Operation.ShowHelp,
@@ -40,7 +41,8 @@ namespace CodeFormatter
             ImmutableArray<string>.Empty,
             null,
             allowTables: false,
-            verbose: false);
+            verbose: false,
+            useTabs: false);
 
 
         public readonly Operation Operation;
@@ -52,6 +54,7 @@ namespace CodeFormatter
         public readonly string Language;
         public readonly bool AllowTables;
         public readonly bool Verbose;
+        public readonly bool UseTabs;
 
         public CommandLineOptions(
             Operation operation,
@@ -62,7 +65,8 @@ namespace CodeFormatter
             ImmutableArray<string> fileNames,
             string language,
             bool allowTables,
-            bool verbose)
+            bool verbose,
+            bool useTabs)
         {
             Operation = operation;
             PreprocessorConfigurations = preprocessorConfigurations;
@@ -73,6 +77,7 @@ namespace CodeFormatter
             Language = language;
             AllowTables = allowTables;
             Verbose = verbose;
+            UseTabs = useTabs;
         }
     }
 
@@ -138,7 +143,7 @@ namespace CodeFormatter
         private const string Usage =
 @"CodeFormatter [/file:<filename>] [/lang:<language>] [/c:<config>[,<config>...]>]
     [/copyright(+|-):[<file>]] [/tables] [/nounicode] 
-    [/rule(+|-):rule1,rule2,...]  [/verbose]
+    [/rule(+|-):rule1,rule2,...]  [/verbose] [/usetabs]
     <project, solution or response file>
 
     /file           - Only apply changes to files with specified name
@@ -148,7 +153,7 @@ namespace CodeFormatter
                       should run under.
     /copyright(+|-) - Enables or disables (default) updating the copyright 
                       header in files, optionally specifying a file 
-                      containing a custom copyright header.                   
+                      containing a custom copyright header.
     /nocopyright    - Do not update the copyright message.
     /tables         - Let tables opt out of formatting by defining
                       DOTNET_FORMATTER
@@ -156,6 +161,7 @@ namespace CodeFormatter
     /rule(+|-)      - Enable (default) or disable the specified rule
     /rules          - List the available rules
     /verbose        - Verbose output
+    /usetabs        - Use tabs for indentation instead of spaces
     /help           - Displays this usage message (short form: /?)
 ";
 
@@ -183,6 +189,7 @@ namespace CodeFormatter
             var language = LanguageNames.CSharp;
             var allowTables = false;
             var verbose = false;
+            var useTabs = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -257,6 +264,10 @@ namespace CodeFormatter
                 {
                     return CommandLineParseResult.CreateSuccess(CommandLineOptions.ListRules);
                 }
+                else if (comparer.Equals(arg, "/usetabs"))
+                {
+                    useTabs = true;
+                }
                 else if (comparer.Equals(arg, "/?") || comparer.Equals(arg, "/help"))
                 {
                     return CommandLineParseResult.CreateSuccess(CommandLineOptions.ShowHelp);
@@ -285,7 +296,8 @@ namespace CodeFormatter
                 fileNames.ToImmutableArray(),
                 language,
                 allowTables,
-                verbose);
+                verbose,
+                useTabs);
             return CommandLineParseResult.CreateSuccess(options);
         }
 
